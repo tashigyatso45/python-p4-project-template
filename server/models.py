@@ -81,7 +81,7 @@ class Question(db.Model, SerializerMixin):
     __tablename__ = 'questions'
 
     id = db.Column(db.Integer, primary_key = True)
-    content = db.Column(db.String)
+    content = db.Column(db.Integer)
     correct_answer = db.Column(db.String)
     question_cards = db.relationship('Question_Card', back_populates= 'question')
     card_decks = association_proxy('question_cards', 'card_deck')

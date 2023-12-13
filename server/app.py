@@ -22,7 +22,7 @@ class Users(Resource):
         return make_response({'user':user.to_dict()}, 201)
 
 
-api.add_resource(Users, '/api/v1/users') 
+api.add_resource(Users, '/api/v1/register') 
 
 @app.route('/api/v1/authorized')
 def authorized():
@@ -55,7 +55,13 @@ class Subjects(Resource):
         return make_response(subjects, 200)
 
 
-api.add_resource(Subjects, '/api/v1/subjects')
+api.add_resource(Subjects, '/api/v1/home')
+class Question_Cards(Resource):
+    def get(self):
+        question_cards = [card_deck.to_dict() for card_deck in Question_Card.query.all()]
+        return make_response(question_card, 200)
+
+api.add_resource(Question_Cards, '/api/v1/question_card')
 @app.route('/')
 def index():
     return '<h1>Project Server</h1>'
