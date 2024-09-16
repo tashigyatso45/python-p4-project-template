@@ -11,7 +11,8 @@ export default function Subjectcard({subject}){
             <div>
                 <h2>{type_operation}</h2>
             </div>
-            <Button>Take me to </Button>
+
+            <Button>Take me to this route</Button>
 
         </Card>
         
