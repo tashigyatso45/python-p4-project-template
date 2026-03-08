@@ -5,3 +5,21 @@
   --text: hsla(0, 0%, 100%, 0.88);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  margin: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--link);
+  outline-offset: 2px;
+}

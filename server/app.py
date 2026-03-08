@@ -39,15 +39,12 @@ def logout():
 
 @app.route('/api/v1/login', methods=['POST'])
 def login():
-    data = request.get_json()
-    try:
-        user = User.query.filter_by(username=data['username']).first()
-        # import ipdb; ipdb.set_trace()
-        if user.authenticate(data['password']):
-            session['user_id']=user.id
-            return make_response({'user': user.to_dict()}, 201)
-    except:
-        return make_response({'error': 'not a user'}, 401)
+    data = request.get_json() or {}
+    user = User.query.filter_by(username=data.get('username')).first()
+    if user and user.authenticate(data.get('password', '')):
+        session['user_id'] = user.id
+        return make_response({'user': user.to_dict()}, 201)
+    return make_response({'error': 'Invalid credentials'}, 401)
 
 class Subjects(Resource):
     def get(self):
@@ -59,7 +56,7 @@ api.add_resource(Subjects, '/api/v1/home')
 class Question_Cards(Resource):
     def get(self):
         question_cards = [card_deck.to_dict() for card_deck in Question_Card.query.all()]
-        return make_response(question_card, 200)
+        return make_response(question_cards, 200)
 
 api.add_resource(Question_Cards, '/api/v1/question_card')
 @app.route('/')

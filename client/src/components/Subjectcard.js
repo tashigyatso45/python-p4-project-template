@@ -1,21 +1,35 @@
- import { Button, Card } from "@mui/material"
+import { Button, Card, CardContent, CardHeader, Box } from "@mui/material";
 
+export default function Subjectcard({ subject }) {
+  const { id, type_operation } = subject;
 
-
-
-export default function Subjectcard({subject}){
-    const {id, type_operation} = subject
-    console.log(type_operation)
-    return(
-        <Card id={id} >
-            <div>
-                <h2>{type_operation}</h2>
-            </div>
-
-            <Button>Take me to this route</Button>
-
-        </Card>
-        
-
-    )
+  return (
+    <Box
+      sx={{
+        transition: "transform 0.2s, box-shadow 0.2s",
+        "&:hover": {
+          transform: "translateY(-2px)",
+        },
+      }}
+    >
+      <Card
+        id={id}
+        role="article"
+        sx={{
+          "&:hover": { boxShadow: 6 },
+        }}
+      >
+        <CardHeader title={type_operation} />
+        <CardContent>
+          <Button
+            variant="contained"
+            fullWidth
+            aria-label={`Navigate to ${type_operation}`}
+          >
+            Take me to this route
+          </Button>
+        </CardContent>
+      </Card>
+    </Box>
+  );
 }
