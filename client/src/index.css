@@ -1,8 +1,11 @@
 :root {
-  --bg: #282c34;
-  --header: #fff;
-  --link: #61dafb;
-  --text: hsla(0, 0%, 100%, 0.88);
+  --bg: #FFF8F0;
+  --primary: #FF8C00;
+  --blue: #4285F4;
+  --green: #4CAF50;
+  --purple: #9C27B0;
+  --text: #2D3436;
+  --text-secondary: #636E72;
 }
 
 html {
@@ -13,6 +16,7 @@ body {
   background-color: var(--bg);
   color: var(--text);
   margin: 0;
+  font-family: 'Nunito', sans-serif;
 }
 
 * {
@@ -20,6 +24,26 @@ body {
 }
 
 *:focus-visible {
-  outline: 2px solid var(--link);
+  outline: 3px solid var(--primary);
   outline-offset: 2px;
+}
+
+@keyframes pop-in {
+  0% { transform: scale(0.6); opacity: 0; }
+  70% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes bounce-in {
+  0% { transform: translateY(20px); opacity: 0; }
+  60% { transform: translateY(-6px); }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+.pop-in {
+  animation: pop-in 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.bounce-in {
+  animation: bounce-in 0.4s ease forwards;
 }

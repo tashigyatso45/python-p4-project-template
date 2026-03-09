@@ -16,75 +16,78 @@ import {
 import { useFormik } from "formik";
 import { useState } from "react";
 import * as yup from "yup";
+import { ThemeProvider } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+import theme from "../theme";
 
-function Signup({ setUser }) {
-  const [signup, setSignup] = useState(true);
+const GRADE_OPTIONS = [
+  { value: 1, label: "Grade 1 — Beginner ⭐" },
+  { value: 2, label: "Grade 2 — Explorer ⭐⭐" },
+  { value: 3, label: "Grade 3 — Champion ⭐⭐⭐" },
+];
+
+function SignupForm({ setUser }) {
+  const [isLogin, setIsLogin] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState(null);
 
   const signupSchema = yup.object().shape({
     username: yup
       .string()
-      .min(5, "Too Short!")
-      .max(15, "Too Long!")
-      .required("Required!"),
-    email: yup.string().email("Invalid email"),
+      .min(5, "Username must be at least 5 characters")
+      .max(15, "Username must be 15 characters or fewer")
+      .required("Username is required"),
+    email: yup.string().email("That doesn't look like a valid email"),
     password: yup
       .string()
-      .min(5, "Too Short!")
-      .max(15, "Too Long!")
-      .required("Required!"),
+      .min(5, "Password must be at least 5 characters")
+      .max(15, "Password must be 15 characters or fewer")
+      .required("Password is required"),
     grade_level: yup
       .number()
-      .min(1, "enter a grade from 1-3")
-      .max(3, "enter a grade from 1-3"),
+      .min(1, "Please pick a grade")
+      .max(3, "Please pick a grade"),
   });
 
   const loginSchema = yup.object().shape({
-    username: yup.string().required("username required"),
-    password: yup.string().required("password required"),
+    username: yup.string().required("Username is required"),
+    password: yup.string().required("Password is required"),
   });
 
   const formik = useFormik({
-    initialValues: {
-      username: "",
-      email: "",
-      password: "",
-      grade_level: "",
-    },
-    validationSchema: signup ? signupSchema : loginSchema,
+    initialValues: { username: "", email: "", password: "", grade_level: "" },
+    validationSchema: isLogin ? loginSchema : signupSchema,
     onSubmit: (values) => {
       setIsSubmitting(true);
       setServerError(null);
-      const endpoint = signup ? "/register" : "/login";
+      const endpoint = isLogin ? "/login" : "/register";
       fetch(endpoint, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),
       })
         .then((resp) => {
           if (resp.ok) {
-            resp.json().then(({ user }) => {
-              setUser(user);
-            });
+            resp.json().then(({ user }) => setUser(user));
           } else {
-            resp.json().then((data) => {
-              setServerError(data.message || "Something went wrong. Please try again.");
-            }).catch(() => {
-              setServerError("Something went wrong. Please try again.");
-            });
+            resp
+              .json()
+              .then((data) =>
+                setServerError(
+                  data.error || data.message || "Something went wrong. Please try again!"
+                )
+              )
+              .catch(() =>
+                setServerError("Something went wrong. Please try again!")
+              );
           }
         })
-        .finally(() => {
-          setIsSubmitting(false);
-        });
+        .finally(() => setIsSubmitting(false));
     },
   });
 
-  function toggleSignup() {
-    setSignup((current) => !current);
+  function toggle() {
+    setIsLogin((v) => !v);
     setServerError(null);
     formik.resetForm();
   }
@@ -92,17 +95,37 @@ function Signup({ setUser }) {
   return (
     <Box
       display="flex"
+      flexDirection="column"
       justifyContent="center"
       alignItems="center"
       minHeight="100vh"
+      sx={{ background: "linear-gradient(160deg, #FFF8F0 0%, #FFE8CC 100%)" }}
     >
-      <Paper elevation={3} sx={{ maxWidth: 420, width: "100%", p: 4 }}>
-        <Typography variant="h4" align="center" gutterBottom>
-          SmartScholars
-        </Typography>
-        <Typography variant="subtitle1" align="center" color="text.secondary" gutterBottom>
-          {signup ? "Create your account" : "Welcome back"}
-        </Typography>
+      <Paper
+        elevation={4}
+        sx={{
+          maxWidth: 440,
+          width: "100%",
+          p: { xs: 3, sm: 5 },
+          m: 2,
+          borderRadius: 5,
+          boxShadow: "0 8px 40px rgba(255,140,0,0.18)",
+        }}
+      >
+        {/* Logo */}
+        <Box textAlign="center" mb={3}>
+          <Typography fontSize="3.5rem" lineHeight={1}>
+            🎓
+          </Typography>
+          <Typography variant="h4" fontWeight={900} mt={1} color="primary.main">
+            SmartScholars
+          </Typography>
+          <Typography color="text.secondary" mt={0.5} fontWeight={600}>
+            {isLogin
+              ? "Welcome back, scholar! 👋"
+              : "Join thousands of young learners! 🚀"}
+          </Typography>
+        </Box>
 
         {serverError && (
           <Alert severity="error" aria-live="polite" sx={{ mb: 2 }}>
@@ -124,15 +147,14 @@ function Signup({ setUser }) {
               onBlur={formik.handleBlur}
               error={formik.touched.username && Boolean(formik.errors.username)}
               helperText={formik.touched.username && formik.errors.username}
-              inputProps={{ "aria-describedby": "username-error" }}
             />
 
-            <Collapse in={signup} unmountOnExit>
+            <Collapse in={!isLogin} unmountOnExit>
               <Stack spacing={2}>
                 <TextField
                   name="email"
                   id="email"
-                  label="Email"
+                  label="Email (optional)"
                   variant="outlined"
                   fullWidth
                   value={formik.values.email}
@@ -143,20 +165,23 @@ function Signup({ setUser }) {
                 />
 
                 <FormControl fullWidth>
-                  <InputLabel id="grade-level-label">Grade</InputLabel>
+                  <InputLabel id="grade-level-label">
+                    What grade are you in?
+                  </InputLabel>
                   <Select
                     name="grade_level"
                     id="grade_level"
                     labelId="grade-level-label"
-                    variant="outlined"
                     value={formik.values.grade_level}
-                    label="Grade"
+                    label="What grade are you in?"
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
                   >
-                    <MenuItem value={1}>1</MenuItem>
-                    <MenuItem value={2}>2</MenuItem>
-                    <MenuItem value={3}>3</MenuItem>
+                    {GRADE_OPTIONS.map((g) => (
+                      <MenuItem key={g.value} value={g.value}>
+                        {g.label}
+                      </MenuItem>
+                    ))}
                   </Select>
                 </FormControl>
               </Stack>
@@ -175,24 +200,37 @@ function Signup({ setUser }) {
               onBlur={formik.handleBlur}
               error={formik.touched.password && Boolean(formik.errors.password)}
               helperText={formik.touched.password && formik.errors.password}
-              inputProps={{ "aria-describedby": "password-error" }}
             />
 
             <Button
               variant="contained"
               type="submit"
               fullWidth
+              size="large"
               disabled={isSubmitting}
-              startIcon={isSubmitting ? <CircularProgress size={18} color="inherit" /> : null}
+              startIcon={
+                isSubmitting ? (
+                  <CircularProgress size={18} color="inherit" />
+                ) : null
+              }
+              sx={{ mt: 1 }}
             >
-              {isSubmitting ? "Loading..." : signup ? "Sign Up" : "Log In"}
+              {isSubmitting
+                ? "Loading…"
+                : isLogin
+                ? "Let's Go! 🚀"
+                : "Create My Account! 🎉"}
             </Button>
 
             <Button
-              onClick={toggleSignup}
-              aria-label={signup ? "Switch to login" : "Switch to sign up"}
+              onClick={toggle}
+              fullWidth
+              aria-label={isLogin ? "Switch to sign up" : "Switch to login"}
+              sx={{ color: "text.secondary", fontWeight: 700 }}
             >
-              {signup ? "Already have an account? Log in" : "Register for an account"}
+              {isLogin
+                ? "New here? Create an account →"
+                : "Already have an account? Log in →"}
             </Button>
           </Stack>
         </form>
@@ -201,4 +239,11 @@ function Signup({ setUser }) {
   );
 }
 
-export default Signup;
+export default function Signup({ setUser }) {
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <SignupForm setUser={setUser} />
+    </ThemeProvider>
+  );
+}
